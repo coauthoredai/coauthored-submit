@@ -27,6 +27,16 @@ def _set_flag(email: str, flag: str, on: bool) -> None:
 
 
 def register(app: Flask) -> None:
+    @app.cli.command("load-classic-schema")
+    def load_classic_schema() -> None:
+        """Load arxiv-base's classic schema (utf8mb4) into an EMPTY MySQL database."""
+        from .classic_schema import load
+        try:
+            n = load(engine())
+        except RuntimeError as ex:
+            raise click.ClickException(str(ex))
+        click.echo(f"classic schema loaded ({n} statements)")
+
     @app.cli.command("init-db")
     def init_db() -> None:
         """Create the coauthored tables (and the classic tables on SQLite), seed reference
