@@ -1,0 +1,28 @@
+{
+ "_submitter_email": "ian@example.org",
+ "title": "3$\\times$3 Nexus Is a First-Player Win",
+ "abstract": "Nexus is a two-player, perfect-information game that combines Go-style placement and capture on an $n\\times n$ grid, tic-tac-toe-style line completion, and a debt rule: every capture creates debt, and a player who completes a line while owing more than the opponent must pay the difference with their own stones, or lose by bankruptcy. We weakly solve the $3\\times3$ game with the default prices (two units per captured stone, four per stone removed in forced unblocking) under positional superko: the first player wins, and every first move wins, within 9 turns from a corner or an edge and within 18 from the centre. The proofs are finite strategy trees, checked by replaying every line through two separate implementations of the rules. Over all prices from 0 to 20 (and some larger), the first player still wins, but which first moves win changes along straight lines in the price plane; the default prices lie exactly on the centre opening's boundary. On $4\\times4$ and $5\\times5$ boards neither player can force a win within 20 and 16 turns. We also compare Nexus with Go and Enhanced Go, and show that debt cycles let a game of Nexus last forever.",
+ "comments": "19 pages, 2 figures, 3 tables. Solver and checkers: https://github.com/haapavesi-institute/nexus-solver",
+ "primary_category": "cs.GT",
+ "cross_lists": [
+  "math.CO"
+ ],
+ "license": "http://creativecommons.org/licenses/by/4.0/",
+ "author_rows": "2",
+ "author-1-display_name": "Ian Joiner",
+ "author-1-kind": "human",
+ "author-1-contribution": "Posed the problems, chose the rules and interpretations, and reviewed the work and the manuscript; responsible for the final text.",
+ "author-1-is_responsible": "on",
+ "submitter": "1",
+ "author-2-display_name": "Claude",
+ "author-2-kind": "ai",
+ "author-2-contribution": "Working as an agent, wrote the solver, the prover, the differential tester and both checkers, ran every experiment reported, and drafted the manuscript.",
+ "author-2-ai_system": "Claude",
+ "author-2-ai_version": "Opus 5.5 (claude-opus-5-5)",
+ "author-2-ai_provider": "Anthropic",
+ "declare_responsibility": "on",
+ "declare_ai_accurate": "on",
+ "declare_coauthors_agreed": "on",
+ "declare_license_right": "on",
+ "op": "submit"
+}

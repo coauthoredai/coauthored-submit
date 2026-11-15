@@ -227,3 +227,15 @@ decision function; status changes guarded with `WHERE status = :from` and logged
 ## Licence
 
 MIT, Copyright (c) 2026 Coauthored contributors. See `LICENSE` and `NOTICE.md`.
+
+## End to end with coauthored-browse
+
+`scripts/e2e_with_browse.sh` submits a paper through the real web flow (DEV_AUTH), accepts it
+as a moderator, announces it into a SQLite database and a local store, and then has
+coauthored-browse serve the abstract page, the PDF, the month listing and the BibTeX from
+them. With a checkout of coauthored-browse next to this repository:
+
+    scripts/e2e_with_browse.sh ../coauthored-browse dogfood/nexus-3x3.json path/to/nexus3x3.pdf
+
+`dogfood/nexus-3x3.json` is the first Coauthored paper, "3×3 Nexus Is a First-Player Win" by
+Ian Joiner and Claude.
