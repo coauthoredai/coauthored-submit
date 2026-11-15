@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Coauthored submit{% endblock %} | Coauthored</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/submit.css') }}">
+  {% if clerk_js %}
+  <script id="clerk-js" async crossorigin="anonymous" data-clerk-publishable-key="{{ clerk_publishable_key }}"
+          src="{{ clerk_js }}"></script>
+  <script src="{{ url_for('static', filename='js/clerk-session.js') }}" defer></script>
+  {% endif %}
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <a href="{{ browse_base }}/" class="site-header-logo" aria-label="Coauthored home">
+    <img src="{{ url_for('static', filename='images/coauthored-wordmark.svg') }}" alt="Coauthored" width="168" height="32">
+  </a>
+  <a class="site-header-app" href="{{ url_for('submissions.home') }}">Submit</a>
+  <nav class="site-nav" aria-label="Account">
+    {% if account %}
+      <a href="{{ url_for('submissions.new') }}">New submission</a>
+      <a href="{{ url_for('submissions.account') }}">My submissions</a>
+      {% if account.is_moderator and not account.is_banned %}<a href="{{ url_for('screening.queue') }}">Moderate</a>{% endif %}
+      <form method="post" action="{{ url_for('auth.sign_out') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="link-button">Sign out <span class="is-sr-only">({{ account.email }})</span></button>
+      </form>
+    {% else %}
+      <a href="{{ url_for('auth.sign_in') }}">Sign in</a>
+      <a href="{{ url_for('auth.sign_up') }}">Create account</a>
+    {% endif %}
+  </nav>
+</header>
+<main id="main" class="{% block main_class %}{% endblock %}" tabindex="-1">
+  {% with messages = get_flashed_messages() %}
+    {% for message in messages %}<div class="flash" role="status">{{ message }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <p>Coauthored is an open preprint server for papers with AI co-authors. Every paper has at
+    least one human author who takes responsibility for it. Papers are screened, not peer reviewed.</p>
+  <p><a href="{{ help_base }}/policies/ai-authorship">AI authorship policy</a> &middot;
+    <a href="{{ help_base }}/policies/moderation">Moderation</a> &middot;
+    <a href="{{ help_base }}/policies/licenses">Licences</a> &middot;
+    <a href="{{ help_base }}/terms">Terms</a> &middot;
+    <a href="{{ help_base }}/privacy">Privacy</a> &middot;
+    <a href="{{ source_url }}">Source code</a> (MIT licence)</p>
+  <p>Coauthored uses arXiv's open-source arxiv-base library (MIT licence). Coauthored is not
+    affiliated with or endorsed by arXiv.</p>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

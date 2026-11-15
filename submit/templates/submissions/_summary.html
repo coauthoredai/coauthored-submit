@@ -1,0 +1,39 @@
+{# Shared by the submitter's and the moderator's detail pages. #}
+<dl class="meta">
+  <dt>Kind</dt><dd>{{ sub.kind|capitalize }}{% if sub.paper_id and sub.kind != 'new' %} of coauthored:{{ sub.paper_id }}{% endif %}</dd>
+  <dt>Status</dt><dd class="status">{{ labels[sub.status] }}{% if sub.status == 'announced' %} as coauthored:{{ sub.paper_id }}v{{ sub.version }}{% endif %}</dd>
+  <dt>Submitted by</dt><dd>{{ sub.account.display_name }} ({{ sub.account.email }})</dd>
+  <dt>Submitted (UTC)</dt><dd>{{ sub.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+  <dt>Primary category</dt><dd>{{ category_label(sub.primary_category) }}</dd>
+  <dt>Cross-lists</dt><dd>{% for c in sub.categories[1:] %}{{ category_label(c) }}{{ ', ' if not loop.last }}{% else %}None{% endfor %}</dd>
+  <dt>Licence</dt><dd><a href="{{ sub.license }}">{{ sub.license }}</a></dd>
+  {% if sub.comments %}<dt>Comments</dt><dd>{{ sub.comments }}</dd>{% endif %}
+  {% if sub.withdrawal_reason %}<dt>Reason for withdrawal</dt><dd>{{ sub.withdrawal_reason }}</dd>{% endif %}
+  {% if sub.pdf_key %}<dt>PDF</dt><dd><a href="{{ pdf_url }}">View the submitted PDF</a> ({{ (sub.pdf_size / 1024)|round|int }} KB, SHA-256 <code>{{ sub.pdf_sha256[:12] }}</code>&hellip;)</dd>{% endif %}
+</dl>
+<h2>Title</h2>
+<p>{{ sub.title }}</p>
+<h2>Abstract</h2>
+<p class="abstract">{{ sub.abstract }}</p>
+<h2>Authors</h2>
+<table>
+  <caption class="is-sr-only">Authors in order</caption>
+  <thead><tr><th scope="col">#</th><th scope="col">Name</th><th scope="col">Kind</th><th scope="col">Details</th><th scope="col">Contribution</th></tr></thead>
+  <tbody>
+  {% for c in sub.contributors %}
+  <tr>
+    <td>{{ c.position }}</td>
+    <td>{{ c.display_name }}</td>
+    <td>{% if c.kind == 'ai' %}<span class="badge">AI</span>{% else %}Human{% endif %}</td>
+    <td>
+      {% if c.kind == 'ai' %}{{ c.ai_system }}, {{ c.ai_version }}, {{ c.ai_provider }}
+      {% else %}
+        {% if c.orcid %}ORCID <a href="https://orcid.org/{{ c.orcid }}">{{ c.orcid }}</a><br>{% endif %}
+        {% if c.is_responsible %}Takes responsibility{% endif %}{% if c.is_responsible and c.is_submitter %}; {% endif %}{% if c.is_submitter %}Submitter{% endif %}
+      {% endif %}
+    </td>
+    <td>{{ c.contribution }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="32" viewBox="0 0 168 32" role="img" aria-label="Coauthored">
+  <circle cx="13" cy="16" r="9" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="23" cy="16" r="9" fill="none" stroke="#7fd3db" stroke-width="3"/>
+  <text x="38" y="22" font-family="Georgia, 'Times New Roman', serif" font-size="19" fill="#ffffff">Coauthored</text>
+</svg>

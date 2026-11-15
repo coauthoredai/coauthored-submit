@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Submission {{ sub.id }}{% endblock %}
+{% block main_class %}wide{% endblock %}
+{% block content %}
+<h1>Submission {{ sub.id }}</h1>
+{% if feedback and sub.status in ('changes_requested', 'rejected', 'on_hold') %}
+<div class="flash" role="note">
+  <h2>Message from the moderators</h2>
+  <p>{{ feedback.reason }}</p>
+</div>
+{% endif %}
+{% if sub.status == 'announced' %}
+<p>Published as <a href="{{ browse_base }}/abs/{{ sub.paper_id }}v{{ sub.version }}">coauthored:{{ sub.paper_id }}v{{ sub.version }}</a>.</p>
+{% endif %}
+{% if actions %}
+<div class="actions">
+  {% if 'resubmit' in actions and sub.kind != 'withdrawal' %}
+    <a class="button" href="{{ url_for('submissions.edit', sub_id=sub.id) }}">Edit and resubmit</a>
+  {% endif %}
+  {% if 'cancel' in actions %}
+  <form method="post" action="{{ url_for('submissions.cancel', sub_id=sub.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="button danger">Cancel this submission</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+{% set pdf_url = url_for('submissions.pdf', sub_id=sub.id) %}
+{% include "submissions/_summary.html" %}
+<h2>History</h2>
+<ol>
+  {% for row in log %}
+  <li>{{ row.created_at.strftime('%Y-%m-%d %H:%M') }} UTC: {{ labels[row.from_status] }} &rarr; {{ labels[row.to_status] }}</li>
+  {% else %}<li>Submitted {{ sub.created_at.strftime('%Y-%m-%d %H:%M') }} UTC.</li>
+  {% endfor %}
+</ol>
+<p><a href="{{ url_for('submissions.account') }}">Back to my submissions</a></p>
+{% endblock %}

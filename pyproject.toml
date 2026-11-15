@@ -1,0 +1,37 @@
+[project]
+name = "coauthored-submit"
+version = "0.1.0"
+description = "Coauthored accounts, submission, screening and daily announce."
+readme = "README.md"
+license = "MIT"
+requires-python = "~=3.11.0"
+dependencies = [
+    "arxiv-base",
+    "flask>=3.0.2,<4",
+    "flask-wtf>=1.2,<2",
+    "sqlalchemy>=2.0.26,<3",
+    "pydantic==2.*",
+    "pyjwt[crypto]>=2.8,<3",
+    "google-cloud-storage>=3.4.1,<4",
+    "pymysql>=1.1,<2",
+    "gunicorn>=23.0.0,<24",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+# Pinned: both coauthored-submit and coauthored-browse use this exact commit (CONTRACT.md).
+arxiv-base = { git = "https://github.com/arXiv/arxiv-base.git", rev = "8841f53ba87e1cc4694a7d9e35d6fa5dd0bb240b" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning:arxiv.*",
+]

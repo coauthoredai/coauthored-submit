@@ -1,0 +1,21 @@
+# Local MySQL 8 for development against the production database engine.
+#   docker compose up -d mysql
+#   MYSQL="docker compose exec -T mysql mysql" scripts/load_classic_schema.sh -ucoauthored -pcoauthored-dev coauthored
+#   CLASSIC_DB_URI=mysql+pymysql://coauthored:coauthored-dev@127.0.0.1:3307/coauthored?charset=utf8mb4 flask --app submit:create_app init-db
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: coauthored
+      MYSQL_USER: coauthored
+      MYSQL_PASSWORD: coauthored-dev        # local development only
+      MYSQL_ROOT_PASSWORD: root-dev         # local development only
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    ports: ["127.0.0.1:3307:3306"]
+    volumes: ["mysql-data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot-dev"]
+      interval: 5s
+      retries: 30
+volumes:
+  mysql-data:

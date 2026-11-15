@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import describedby, error, summary %}
+{% block title %}Screen submission {{ sub.id }}{% endblock %}
+{% block main_class %}wide{% endblock %}
+{% block content %}
+<h1>Screen submission {{ sub.id }}</h1>
+<p><a href="{{ url_for('screening.queue') }}">Back to the queue</a></p>
+{% set pdf_url = url_for('screening.pdf', sub_id=sub.id) %}
+{% include "submissions/_summary.html" %}
+
+<h2 id="decision">Decision</h2>
+{% if own %}
+<p><strong>This is your own submission.</strong> Another moderator must screen it.</p>
+{% elif actions %}
+{{ summary(errors, {'action': 'Action', 'reason': 'Reason', 'checklist': 'Checklist'}) }}
+<form method="post" class="stack" novalidate action="{{ url_for('screening.act', sub_id=sub.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <fieldset id="checklist"{{ describedby('checklist', errors, true) }}>
+    <legend>Screening checklist</legend>
+    <p class="hint" id="checklist-hint">Every item must be ticked to accept.</p>
+    {{ error('checklist', errors) }}
+    {% for key, text in checklist.items() %}
+    <label class="check" for="check_{{ key }}">
+      <input type="checkbox" id="check_{{ key }}" name="check_{{ key }}"{% if key in values.checked %} checked{% endif %}>
+      <span>{{ text }}</span>
+    </label>
+    {% endfor %}
+  </fieldset>
+  <fieldset id="action"{{ describedby('action', errors) }}>
+    <legend>Action</legend>
+    {{ error('action', errors) }}
+    {% for value, label in actions %}
+    <label class="check" for="action-{{ value }}">
+      <input type="radio" id="action-{{ value }}" name="action" value="{{ value }}"{% if values.action == value %} checked{% endif %}>
+      <span>{{ label }}{% if value in ('reject', 'request_changes') %} (reason required){% endif %}</span>
+    </label>
+    {% endfor %}
+  </fieldset>
+  <div>
+    <label for="reason">Reason or note to the submitter</label>
+    <p class="hint" id="reason-hint">Required to reject or request changes. It is emailed to the submitter.</p>
+    {{ error('reason', errors) }}
+    <textarea id="reason" name="reason" rows="4" maxlength="4000"{{ describedby('reason', errors, true) }}>{{ values.reason }}</textarea>
+  </div>
+  <p class="actions"><button type="submit" class="button">Record decision</button></p>
+</form>
+{% else %}
+<p>No moderator action is possible while the submission is {{ labels[sub.status]|lower }}.</p>
+{% endif %}
+
+<h2>History</h2>
+<table>
+  <caption class="is-sr-only">Status changes, oldest first</caption>
+  <thead><tr><th scope="col">When (UTC)</th><th scope="col">Change</th><th scope="col">By</th><th scope="col">Reason</th></tr></thead>
+  <tbody>
+  {% for row in log %}
+  <tr><td>{{ row.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ labels[row.from_status] }} &rarr; {{ labels[row.to_status] }}</td>
+      <td>{% if row.moderator_account_id %}Moderator {{ row.moderator_account_id }}{% elif row.action in ('claim', 'publish') %}Announce{% else %}Submitter{% endif %}</td>
+      <td>{{ row.reason or '' }}</td></tr>
+  {% else %}<tr><td colspan="4">No changes yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

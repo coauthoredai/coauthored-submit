@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Screening queue{% endblock %}
+{% block main_class %}wide{% endblock %}
+{% block content %}
+<h1>Screening queue</h1>
+<p class="muted">Screening checks that a submission is a genuine, complete scholarly paper that credits its AI
+  authors per policy. It is not peer review. Accepted papers are published at the next daily announce.</p>
+{% for heading, subs in sections %}
+<h2>{{ heading }} ({{ subs|length }})</h2>
+{% if subs %}
+<table>
+  <caption class="is-sr-only">{{ heading }}, oldest first</caption>
+  <thead><tr><th scope="col">Submission</th><th scope="col">Kind</th><th scope="col">Title</th><th scope="col">Category</th><th scope="col">Submitted (UTC)</th></tr></thead>
+  <tbody>
+  {% for s in subs %}
+  <tr>
+    <td><a href="{{ url_for('screening.detail', sub_id=s.id) }}">{{ s.id }}<span class="is-sr-only">: review</span></a></td>
+    <td>{{ s.kind }}{% if s.kind != 'new' %} of coauthored:{{ s.paper_id }}{% endif %}</td>
+    <td>{{ s.title }}</td>
+    <td>{{ s.primary_category }}</td>
+    <td>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p>None.</p>{% endif %}
+{% endfor %}
+{% endblock %}

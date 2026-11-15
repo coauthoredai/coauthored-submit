@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import describedby, error, summary %}
+{% block title %}Withdraw coauthored:{{ paper.paper_id }}{% endblock %}
+{% block content %}
+<h1>Withdraw coauthored:{{ paper.paper_id }}</h1>
+<p>{{ paper.title }}</p>
+<p>Withdrawal adds a new version, <code>coauthored:{{ paper.paper_id }}v{{ paper.version + 1 }}</code>, that has no PDF and
+  shows your reason. Earlier versions stay available, as they are part of the scholarly record. Moderators review
+  withdrawal requests before they are announced.</p>
+{{ summary(errors, {'reason': 'Reason', 'authorized': 'Declaration'}) }}
+<form method="post" class="stack" novalidate action="{{ request.path }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div>
+    <label for="reason">Reason for withdrawal</label>
+    <p class="hint" id="reason-hint">Shown publicly, for example "an error in the proof of Lemma 2".</p>
+    {{ error('reason', errors) }}
+    <textarea id="reason" name="reason" rows="4" maxlength="1000"{{ describedby('reason', errors, true) }}>{{ values.reason }}</textarea>
+  </div>
+  {{ error('authorized', errors) }}
+  <label class="check" for="authorized">
+    <input type="checkbox" id="authorized" name="authorized"{% if values.authorized %} checked{% endif %}{{ describedby('authorized', errors) }}>
+    <span>I may withdraw this paper on behalf of its authors.</span>
+  </label>
+  <p class="actions"><button type="submit" class="button danger">Request withdrawal</button>
+    <a href="{{ url_for('submissions.account') }}">Cancel</a></p>
+</form>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Sign out{% endblock %}
+{% block content %}
+<h1>Signing you out</h1>
+<p>If nothing happens, use this button.</p>
+<p><button type="button" class="button" data-clerk-sign-out data-redirect="{{ url_for('submissions.home') }}">Sign out</button></p>
+<noscript><p>Signing out of Clerk needs JavaScript. You can also close your browser to end the session.</p></noscript>
+{% endblock %}

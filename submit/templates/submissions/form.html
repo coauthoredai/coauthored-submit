@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% from "_macros.html" import describedby, error, summary %}
+{% if mode == 'replace' %}{% set heading = 'Replace coauthored:' ~ paper.paper_id ~ ' with a new version' %}
+{% elif mode == 'edit' %}{% set heading = 'Edit and resubmit submission ' ~ sub.id %}
+{% else %}{% set heading = 'New submission' %}{% endif %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<h1>{{ heading }}</h1>
+{% if mode == 'replace' %}
+<p>The new version will be announced as <code>coauthored:{{ paper.paper_id }}v{{ paper.version + 1 }}</code>
+  (or the next free version) once moderators accept it. The form starts with the current version's details.</p>
+{% elif mode == 'edit' %}
+<p>Moderators asked for changes. Edit what they asked for, then resubmit; the submission goes back to the
+  screening queue. <a href="{{ url_for('submissions.detail', sub_id=sub.id) }}">See their message</a>.</p>
+{% endif %}
+<p class="muted">All fields are required unless marked optional.</p>
+
+{% set labels = {'title': 'Title', 'abstract': 'Abstract', 'comments': 'Comments', 'primary_category': 'Primary category',
+   'cross_lists': 'Cross-lists', 'license': 'Licence', 'authors': 'Authors', 'pdf': 'PDF',
+   'declare_responsibility': 'Declaration', 'declare_ai_accurate': 'Declaration',
+   'declare_coauthors_agreed': 'Declaration', 'declare_license_right': 'Declaration'} %}
+{{ summary(errors, labels) }}
+
+<form method="post" enctype="multipart/form-data" class="stack" novalidate
+      action="{{ request.path }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="author_rows" value="{{ rows }}">
+
+  <div>
+    <label for="title">Title</label>
+    {{ error('title', errors) }}
+    <input type="text" id="title" name="title" maxlength="255" value="{{ values.title or '' }}"{{ describedby('title', errors) }}>
+  </div>
+
+  <div>
+    <label for="abstract">Abstract</label>
+    <p class="hint" id="abstract-hint">Plain text, up to 1,920 characters. You may use TeX notation such as $x^2$.</p>
+    {{ error('abstract', errors) }}
+    <textarea id="abstract" name="abstract" rows="8" maxlength="1920"{{ describedby('abstract', errors, true) }}>{{ values.abstract or '' }}</textarea>
+  </div>
+
+  <div>
+    <label for="comments">Comments (optional)</label>
+    <p class="hint" id="comments-hint">For example: "12 pages, 3 figures" or, for a replacement, what changed.</p>
+    {{ error('comments', errors) }}
+    <input type="text" id="comments" name="comments" maxlength="1000" value="{{ values.comments or '' }}"{{ describedby('comments', errors, true) }}>
+  </div>
+
+  <div>
+    <label for="primary_category">Primary category</label>
+    {{ error('primary_category', errors) }}
+    <select id="primary_category" name="primary_category"{{ describedby('primary_category', errors) }}>
+      <option value="">Choose a category</option>
+      {% for group, options in category_groups %}
+      <optgroup label="{{ group }}">
+        {% for opt in options %}<option value="{{ opt.id }}"{% if values.primary_category == opt.id %} selected{% endif %}>{{ opt.label }}</option>{% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="cross_lists">Cross-list categories (optional)</label>
+    <p class="hint" id="cross_lists-hint">Up to {{ max_cross }}. To choose several, hold Ctrl (Cmd on a Mac) and click, or use Shift and the arrow keys.</p>
+    {{ error('cross_lists', errors) }}
+    <select id="cross_lists" name="cross_lists" multiple size="10"{{ describedby('cross_lists', errors, true) }}>
+      {% for group, options in category_groups %}
+      <optgroup label="{{ group }}">
+        {% for opt in options %}<option value="{{ opt.id }}"{% if opt.id in values.cross_lists %} selected{% endif %}>{{ opt.label }}</option>{% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+  </div>
+
+  <fieldset id="license"{{ describedby('license', errors) }}>
+    <legend>Licence</legend>
+    {{ error('license', errors) }}
+    {% for opt in licenses %}
+    <label class="check" for="license-{{ loop.index }}">
+      <input type="radio" id="license-{{ loop.index }}" name="license" value="{{ opt.uri }}"{% if values.license == opt.uri %} checked{% endif %}>
+      <span><strong>{{ opt.label }}</strong><br><span class="muted">{{ opt.note }}</span></span>
+    </label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset id="authors"{{ describedby('authors', errors, true) }}>
+    <legend>Authors, in order</legend>
+    <p class="hint" id="authors-hint">At least one author must be a human who takes responsibility for the paper,
+      and you must be one of the human authors. Each AI author needs its system, version, provider and contribution.
+      Empty rows are ignored.</p>
+    {{ error('authors', errors) }}
+    {% for n in range(1, rows + 1) %}
+      {% set a = authors[n - 1] if n <= authors|length else {} %}
+      {% set p = 'author-' ~ n ~ '-' %}
+      <fieldset class="author" id="author-{{ n }}">
+        <legend>Author {{ n }}</legend>
+        <div class="grid-2">
+          <div>
+            <label for="{{ p }}display_name">Name as it should appear</label>
+            {{ error(p ~ 'display_name', errors) }}
+            <input type="text" id="{{ p }}display_name" name="{{ p }}display_name" maxlength="255"
+                   value="{{ a.display_name or '' }}"{% if focus_row == n %} autofocus{% endif %}{{ describedby(p ~ 'display_name', errors) }}>
+          </div>
+          <div>
+            <label for="{{ p }}kind">Kind of author</label>
+            {{ error(p ~ 'kind', errors) }}
+            <select id="{{ p }}kind" name="{{ p }}kind" data-author-kind{{ describedby(p ~ 'kind', errors) }}>
+              <option value="human"{% if a.kind != 'ai' %} selected{% endif %}>Human</option>
+              <option value="ai"{% if a.kind == 'ai' %} selected{% endif %}>AI</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="{{ p }}contribution">Contribution</label>
+          <p class="hint" id="{{ p }}contribution-hint">What this author did, for example "conceived the study and wrote section 2" or "drafted the proofs in section 3, checked by the human authors".</p>
+          {{ error(p ~ 'contribution', errors) }}
+          <textarea id="{{ p }}contribution" name="{{ p }}contribution" rows="3" maxlength="2000"{{ describedby(p ~ 'contribution', errors, true) }}>{{ a.contribution or '' }}</textarea>
+        </div>
+        <div class="human-only">
+          <h3>Human authors only</h3>
+          <label for="{{ p }}orcid">ORCID iD (optional)</label>
+          <p class="hint" id="{{ p }}orcid-hint">For example 0000-0002-1825-0097.</p>
+          {{ error(p ~ 'orcid', errors) }}
+          <input type="text" id="{{ p }}orcid" name="{{ p }}orcid" maxlength="40" value="{{ a.orcid or '' }}"{{ describedby(p ~ 'orcid', errors, true) }}>
+          {{ error(p ~ 'is_responsible', errors) }}
+          <label class="check" for="{{ p }}is_responsible">
+            <input type="checkbox" id="{{ p }}is_responsible" name="{{ p }}is_responsible"{% if a.is_responsible %} checked{% endif %}{{ describedby(p ~ 'is_responsible', errors) }}>
+            <span>Takes responsibility for the paper</span>
+          </label>
+          {{ error(p ~ 'is_submitter', errors) }}
+          <label class="check" for="{{ p }}is_submitter">
+            <input type="radio" id="{{ p }}is_submitter" name="submitter" value="{{ n }}"{% if a.is_submitter %} checked{% endif %}{{ describedby(p ~ 'is_submitter', errors) }}>
+            <span>This author is me (the submitter)</span>
+          </label>
+        </div>
+        <div class="ai-only">
+          <h3>AI authors only</h3>
+          <div class="grid-2">
+            {% for f, label, example in [('ai_system', 'AI system', 'Claude'), ('ai_version', 'Model version', 'Opus 5.5 (claude-opus-5-5)'), ('ai_provider', 'Provider', 'Anthropic')] %}
+            <div>
+              <label for="{{ p ~ f }}">{{ label }}</label>
+              <p class="hint" id="{{ p ~ f }}-hint">For example: {{ example }}</p>
+              {{ error(p ~ f, errors) }}
+              <input type="text" id="{{ p ~ f }}" name="{{ p ~ f }}" maxlength="128" value="{{ a[f] or '' }}"{{ describedby(p ~ f, errors, true) }}>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </fieldset>
+    {% endfor %}
+    <p class="actions">
+      <button type="submit" name="op" value="add_author" class="button secondary" formnovalidate>Add another author</button>
+    </p>
+  </fieldset>
+
+  <div>
+    <label for="pdf">The paper (PDF){% if mode == 'edit' %} (optional){% endif %}</label>
+    <p class="hint" id="pdf-hint">A PDF file up to {{ max_pdf_mb }} MB.
+      {% if mode == 'edit' %}Leave this empty to keep the PDF you uploaded before.{% endif %}
+      If the form comes back with errors, choose the file again.</p>
+    {{ error('pdf', errors) }}
+    <input type="file" id="pdf" name="pdf" accept="application/pdf,.pdf"{{ describedby('pdf', errors, true) }}>
+  </div>
+
+  <fieldset id="declarations">
+    <legend>Declarations</legend>
+    {% set texts = {
+      'responsibility': 'The human authors take responsibility for the content of this paper, including the parts written with AI.',
+      'ai_accurate': 'The AI authors and their contributions are stated accurately and completely.',
+      'coauthors_agreed': 'All human co-authors have agreed to this submission and to how they are listed.',
+      'license_right': 'I have the right to distribute this paper under the licence chosen above.'} %}
+    {% for d in declarations %}
+      {% set id = 'declare_' ~ d %}
+      {{ error(id, errors) }}
+      <label class="check" for="{{ id }}">
+        <input type="checkbox" id="{{ id }}" name="{{ id }}"{% if values.declarations and values.declarations.get(d) %} checked{% endif %}{{ describedby(id, errors) }}>
+        <span>{{ texts[d] }}</span>
+      </label>
+    {% endfor %}
+  </fieldset>
+
+  <p class="actions">
+    <button type="submit" name="op" value="submit" class="button">{{ 'Resubmit' if mode == 'edit' else 'Submit for screening' }}</button>
+    <a href="{{ url_for('submissions.account') }}">Cancel</a>
+  </p>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/author-kind.js') }}" defer></script>{% endblock %}

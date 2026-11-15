@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "_macros.html" import describedby, error %}
+{% block title %}Sign in (development){% endblock %}
+{% block content %}
+<h1>Sign in (development only)</h1>
+<p class="muted">DEV_AUTH is on: this form trusts whatever email you type. It cannot be enabled in production.</p>
+{% set errors = {'email': form.email.errors[0]} if form.email.errors else {} %}
+<form method="post" class="stack" action="{{ url_for('auth.sign_in', next=next_path) }}">
+  {{ form.csrf_token }}
+  <div>
+    <label for="email">Email address</label>
+    {{ error('email', errors) }}
+    <input type="email" id="email" name="email" autocomplete="email" required value="{{ form.email.data or '' }}"{{ describedby('email', errors) }}>
+  </div>
+  <button type="submit" class="button">Sign in</button>
+</form>
+{% endblock %}

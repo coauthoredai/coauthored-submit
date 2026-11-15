@@ -1,0 +1,27 @@
+{# Field helpers. Every error is text starting with "Error:", tied to its field by
+   aria-describedby, and listed in the summary at the top of the form. #}
+{% macro describedby(id, errors, hint=false) -%}
+{%- set ids = [] -%}
+{%- if hint %}{% set _ = ids.append(id ~ '-hint') %}{% endif -%}
+{%- if errors.get(id) %}{% set _ = ids.append(id ~ '-error') %}{% endif -%}
+{%- if ids %} aria-describedby="{{ ids|join(' ') }}"{% endif -%}
+{%- if errors.get(id) %} aria-invalid="true"{% endif -%}
+{%- endmacro %}
+
+{% macro error(id, errors) -%}
+{%- if errors.get(id) %}<p class="field-error" id="{{ id }}-error">Error: {{ errors[id] }}</p>{% endif -%}
+{%- endmacro %}
+
+{% macro summary(errors, labels={}) -%}
+{% if errors %}
+<div class="error-summary" role="alert" aria-labelledby="error-summary-title" tabindex="-1" id="error-summary">
+  <h2 id="error-summary-title">There {{ 'is a problem' if errors|length == 1 else 'are ' ~ errors|length ~ ' problems' }}</h2>
+  <ul>
+  {% for id, msg in errors.items() %}
+    {% if id == 'form' %}<li>{{ msg }}</li>
+    {% else %}<li><a href="#{{ id }}">{{ labels.get(id, '') }}{{ ': ' if labels.get(id) }}{{ msg }}</a></li>{% endif %}
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{%- endmacro %}

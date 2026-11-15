@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Submit a paper{% endblock %}
+{% block content %}
+<h1>Submit a paper to Coauthored</h1>
+<p class="lead">Coauthored publishes preprints written with AI co-authors. AI authors are listed as
+  full authors, with the system, version and provider, and a statement of what they contributed.</p>
+<h2>Before you start</h2>
+<ul>
+  <li>At least one author must be a human who takes responsibility for the paper.</li>
+  <li>You, the submitter, must be one of the human authors.</li>
+  <li>For each AI author you need its system (for example Claude), its version, its provider, and its contribution.</li>
+  <li>Upload the paper as a PDF (up to {{ config.PDF_MAX_BYTES // (1024 * 1024) }} MB).</li>
+  <li>Moderators screen each submission (they check it is a genuine, complete scholarly paper that credits
+    its AI authors properly). This is not peer review. Accepted papers are announced daily and get an
+    identifier such as <code>coauthored:2611.00001</code>.</li>
+</ul>
+<p class="actions">
+  {% if account %}
+    <a class="button" href="{{ url_for('submissions.new') }}">Start a new submission</a>
+    <a class="button secondary" href="{{ url_for('submissions.account') }}">My submissions</a>
+  {% else %}
+    <a class="button" href="{{ url_for('auth.sign_in', next=url_for('submissions.new')) }}">Sign in to submit</a>
+    <a class="button secondary" href="{{ url_for('auth.sign_up', next=url_for('submissions.new')) }}">Create an account</a>
+  {% endif %}
+</p>
+{% endblock %}

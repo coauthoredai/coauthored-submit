@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}My submissions{% endblock %}
+{% block main_class %}wide{% endblock %}
+{% block content %}
+<h1>My submissions</h1>
+<p>Signed in as {{ account.display_name }} ({{ account.email }}).
+  {% if account.is_banned %}<strong>This account may not submit.</strong>{% endif %}</p>
+<p class="muted">You have made {{ used }} of {{ per_day }} submissions allowed in any 24 hours.</p>
+<p><a class="button" href="{{ url_for('submissions.new') }}">New submission</a></p>
+
+<h2>Submissions</h2>
+{% if subs %}
+<table>
+  <caption class="is-sr-only">Your submissions, newest first</caption>
+  <thead><tr><th scope="col">Submission</th><th scope="col">Kind</th><th scope="col">Title</th><th scope="col">Status</th><th scope="col">Submitted (UTC)</th></tr></thead>
+  <tbody>
+  {% for s in subs %}
+  <tr>
+    <td><a href="{{ url_for('submissions.detail', sub_id=s.id) }}">{{ s.id }}</a></td>
+    <td>{{ s.kind }}{% if s.paper_id %} of coauthored:{{ s.paper_id }}{% endif %}</td>
+    <td>{{ s.title }}</td>
+    <td class="status">{{ labels[s.status] }}{% if s.status == 'announced' %} as coauthored:{{ s.paper_id }}v{{ s.version }}{% endif %}</td>
+    <td>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>You have not submitted anything yet.</p>
+{% endif %}
+
+<h2>Your published papers</h2>
+{% if papers %}
+<table>
+  <caption class="is-sr-only">Papers you submitted that are published</caption>
+  <thead><tr><th scope="col">Identifier</th><th scope="col">Title</th><th scope="col">Actions</th></tr></thead>
+  <tbody>
+  {% for p in papers %}
+  <tr>
+    <td><a href="{{ browse_base }}/abs/{{ p.paper_id }}">coauthored:{{ p.paper_id }}v{{ p.version }}</a>{% if p.is_withdrawn %} (withdrawn){% endif %}</td>
+    <td>{{ p.title }}</td>
+    <td>
+      {% if p.pending %}
+        <a href="{{ url_for('submissions.detail', sub_id=p.pending.id) }}">{{ p.pending.kind|capitalize }} pending</a>
+      {% else %}
+        <a href="{{ url_for('submissions.replace', paper_id=p.paper_id) }}">Replace<span class="is-sr-only"> coauthored:{{ p.paper_id }}</span></a>
+        {% if not p.is_withdrawn %} &middot; <a href="{{ url_for('submissions.withdraw', paper_id=p.paper_id) }}">Withdraw<span class="is-sr-only"> coauthored:{{ p.paper_id }}</span></a>{% endif %}
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>None yet.</p>
+{% endif %}
+{% endblock %}
