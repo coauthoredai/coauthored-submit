@@ -46,7 +46,7 @@ Licence URIs offered (values of `Metadata.license`):
 - `http://creativecommons.org/publicdomain/zero/1.0/`
 - `http://arxiv.org/licenses/nonexclusive-distrib/1.0/` is NOT offered (it grants rights
   to arXiv). Coauthored's own non-exclusive licence is
-  `https://coauthored.pub/licenses/nonexclusive-distrib/1.0/` (configurable host).
+  `https://aicoauthored.dev/licenses/nonexclusive-distrib/1.0/` (configurable host).
 
 ### Coauthored tables (owned and created by coauthored-submit)
 `coauthored_contributors`: the published author list, read by browse.

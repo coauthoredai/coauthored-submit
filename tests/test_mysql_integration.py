@@ -35,9 +35,9 @@ def test_announce_on_mysql(store, mail):
     with app.app_context():
         assert create_schema(engine()) == []
     with new_session(app) as session:
-        seed_reference_rows(session, "coauthored.pub")
+        seed_reference_rows(session, "aicoauthored.dev")
         session.commit()
-        assert seed_reference_rows(session, "coauthored.pub") == 0
+        assert seed_reference_rows(session, "aicoauthored.dev") == 0
         stamp = datetime.now().strftime("%H%M%S%f")
         author = Account(clerk_user_id=f"dev:it{stamp}@example.org", email=f"it{stamp}@example.org",
                          display_name="Zoë Ångström", created_at=datetime(2026, 11, 1))

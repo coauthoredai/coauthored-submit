@@ -116,7 +116,7 @@ def test_seeds_and_reasons_json(session, store, people):
     licences = set(session.scalars(select(License.name)))
     assert {CC_BY, "http://creativecommons.org/licenses/by-sa/4.0/",
             "http://creativecommons.org/publicdomain/zero/1.0/",
-            "https://coauthored.pub/licenses/nonexclusive-distrib/1.0/"} <= licences
+            "https://aicoauthored.dev/licenses/nonexclusive-distrib/1.0/"} <= licences
     assert "http://arxiv.org/licenses/nonexclusive-distrib/1.0/" not in licences
 
 

@@ -65,7 +65,7 @@ def _run_lock(session: Session) -> Iterator[bool]:
 
 
 def announce_pending(session: Session, store: Store, now: datetime, *,
-                     license_host: str = "coauthored.pub",
+                     license_host: str = "aicoauthored.dev",
                      send: Optional[Callable[[Message], object]] = None,
                      abs_url: Callable[[str], str] = lambda pid: f"/abs/{pid}") -> AnnounceResult:
     """Publish all accepted (and resume all claimed) submissions. `now` is naive UTC."""

@@ -1,7 +1,7 @@
 """Licences offered (CONTRACT.md). The values are the URIs stored in arXiv_metadata.license.
 
 arXiv's own non-exclusive licence is deliberately absent: it grants rights to arXiv.
-Coauthored's equivalent lives on LICENSE_HOST (default coauthored.pub).
+Coauthored's equivalent lives on LICENSE_HOST (default aicoauthored.dev).
 """
 from typing import NamedTuple
 
@@ -22,7 +22,7 @@ def nonexclusive_uri(host: str) -> str:
     return f"https://{host}/licenses/nonexclusive-distrib/1.0/"
 
 
-def offered_licenses(host: str = "coauthored.pub") -> list[LicenseOption]:
+def offered_licenses(host: str = "aicoauthored.dev") -> list[LicenseOption]:
     return [
         LicenseOption(CC_BY, "CC BY 4.0: Creative Commons Attribution",
                       "Others may share and adapt the paper for any purpose, with credit.", 1),
@@ -35,5 +35,5 @@ def offered_licenses(host: str = "coauthored.pub") -> list[LicenseOption]:
     ]
 
 
-def offered_uris(host: str = "coauthored.pub") -> set[str]:
+def offered_uris(host: str = "aicoauthored.dev") -> set[str]:
     return {opt.uri for opt in offered_licenses(host)}

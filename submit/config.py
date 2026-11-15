@@ -40,9 +40,9 @@ DEFAULTS: dict[str, Any] = {
     "PDF_MAX_BYTES": PDF_MAX_BYTES_LIMIT,
     "SUBMISSIONS_PER_DAY": 5,
     "MAX_CROSS_LISTS": 4,
-    "LICENSE_HOST": "coauthored.pub",
-    "BROWSE_BASE_URL": "https://coauthored.pub",
-    "HELP_BASE_URL": "https://coauthored.pub",
+    "LICENSE_HOST": "aicoauthored.dev",
+    "BROWSE_BASE_URL": "https://aicoauthored.dev",
+    "HELP_BASE_URL": "https://aicoauthored.dev",
     "SOURCE_URL": "https://github.com/coauthoredai/coauthored-submit",
     # Auth
     "DEV_AUTH": False,
@@ -59,7 +59,7 @@ DEFAULTS: dict[str, Any] = {
     "CLERK_API_URL": "https://api.clerk.com/v1",
     # Mail
     "MAILER": "log",  # smtp | log | capture
-    "MAIL_FROM": "Coauthored <no-reply@coauthored.pub>",
+    "MAIL_FROM": "Coauthored <no-reply@aicoauthored.dev>",
     "SMTP_HOST": "",
     "SMTP_PORT": 587,
     "SMTP_USERNAME": "",

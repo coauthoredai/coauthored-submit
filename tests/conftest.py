@@ -19,7 +19,7 @@ def template_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
     assert create_schema(engine) == []
     from sqlalchemy.orm import Session
     with Session(engine) as session:
-        seed_reference_rows(session, "coauthored.pub")
+        seed_reference_rows(session, "aicoauthored.dev")
         session.commit()
     engine.dispose()
     return path

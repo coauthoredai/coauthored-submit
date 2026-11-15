@@ -10,7 +10,7 @@ from submit.submissions.pdf import PdfError, check_pdf, staging_key
 from submit.submissions.schema import SubmissionIn, WithdrawalIn, orcid_checksum_ok
 from tests.helpers import author_dicts, form_fields, submission_dict, submission_in
 
-CTX = {"max_cross_lists": 4, "license_host": "coauthored.pub"}
+CTX = {"max_cross_lists": 4, "license_host": "aicoauthored.dev"}
 
 
 def errors(**overrides):
@@ -84,8 +84,8 @@ def test_orcid_check_digit():
 
 def test_licence_must_be_offered():
     assert ("license",) in errors(license="http://arxiv.org/licenses/nonexclusive-distrib/1.0/")
-    ok = submission_in(license="https://coauthored.pub/licenses/nonexclusive-distrib/1.0/")
-    assert ok.license.startswith("https://coauthored.pub/")
+    ok = submission_in(license="https://aicoauthored.dev/licenses/nonexclusive-distrib/1.0/")
+    assert ok.license.startswith("https://aicoauthored.dev/")
 
 
 def test_categories_must_be_active_canonical_and_limited():

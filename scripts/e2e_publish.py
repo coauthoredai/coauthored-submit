@@ -33,7 +33,7 @@ def main(db_path: str, store_dir: str, fields_json: str, pdf_path: str, when: st
     problems = create_schema(engine)
     assert not problems, problems
     with Session(engine) as s:
-        seed_reference_rows(s, "coauthored.pub")
+        seed_reference_rows(s, "aicoauthored.dev")
         s.commit()
     store = LocalStore(store_dir)
     mail = CapturingMailer()

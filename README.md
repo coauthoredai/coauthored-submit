@@ -136,8 +136,8 @@ All settings are environment variables; `.env.example` lists them with examples.
 | `STORAGE_PREFIX` | `./local-store` | local directory, or `gs://BUCKET` (bucket root) |
 | `PDF_MAX_BYTES` | 52428800 (50 MB) | may be lowered, never raised; see uploads below |
 | `SUBMISSIONS_PER_DAY`, `MAX_CROSS_LISTS` | 5, 4 | |
-| `LICENSE_HOST` | `coauthored.pub` | host of Coauthored's non-exclusive licence URI |
-| `BROWSE_BASE_URL` | `https://coauthored.pub` | links to `{BROWSE_BASE_URL}/abs/<id>` in pages and emails |
+| `LICENSE_HOST` | `aicoauthored.dev` | host of Coauthored's non-exclusive licence URI |
+| `BROWSE_BASE_URL` | `https://aicoauthored.dev` | links to `{BROWSE_BASE_URL}/abs/<id>` in pages and emails |
 | `HELP_BASE_URL`, `SOURCE_URL` | | footer links |
 | `DEV_AUTH` | off | development/tests only (fails closed otherwise) |
 | `CLERK_JWKS_URL`, `CLERK_ISSUER` | | required unless `DEV_AUTH` |
@@ -188,14 +188,14 @@ One container image (`Dockerfile`) serves both roles.
 - **Cloud Run service** (web): `--add-cloudsql-instances PROJECT:REGION:INSTANCE`,
   `CLASSIC_DB_URI=mysql+pymysql://USER:PASS@/DB?unix_socket=/cloudsql/PROJECT:REGION:INSTANCE&charset=utf8mb4`,
   secrets (`SECRET_KEY`, DB password, `SMTP_PASSWORD`, `CLERK_SECRET_KEY`) from Secret
-  Manager, map it to `submit.coauthored.pub`. `ProxyFix` trusts one proxy hop for the
+  Manager, map it to `submit.aicoauthored.dev`. `ProxyFix` trusts one proxy hop for the
   scheme and host.
 - **Cloud Run job** (announce): same image and settings, command `flask`, args
   `announce`, `--max-retries 3`, `--tasks 1`. It exits non-zero if any paper failed.
 - **Cloud Scheduler**: a daily HTTP trigger of the job's `:run` endpoint (OAuth with a
   service account that has `roles/run.invoker`), e.g. `0 20 * * *` in UTC.
-- **Clerk**: a production instance on your domain (Frontend API `clerk.coauthored.pub`,
-  Account Portal `accounts.coauthored.pub`). Set `CLERK_ISSUER` to the Frontend API URL,
+- **Clerk**: a production instance on your domain (Frontend API `clerk.aicoauthored.dev`,
+  Account Portal `accounts.aicoauthored.dev`). Set `CLERK_ISSUER` to the Frontend API URL,
   `CLERK_JWKS_URL` to `{issuer}/.well-known/jwks.json`, `CLERK_AUTHORIZED_PARTIES` to
   this app's origin, and the hosted sign-in/up URLs. Add the custom session-token claims
   `{"email": "{{user.primary_email_address}}", "name": "{{user.full_name}}"}` (Clerk

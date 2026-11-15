@@ -222,7 +222,7 @@ class SubmissionIn(BaseModel):
     @field_validator("license")
     @classmethod
     def _license(cls, v: str, info: ValidationInfo) -> str:
-        host = (info.context or {}).get("license_host", "coauthored.pub")
+        host = (info.context or {}).get("license_host", "aicoauthored.dev")
         if v not in offered_uris(host):
             raise PydanticCustomError("license", "Choose one of the licences offered.")
         return v
