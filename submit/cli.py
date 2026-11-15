@@ -27,6 +27,29 @@ def _set_flag(email: str, flag: str, on: bool) -> None:
 
 
 def register(app: Flask) -> None:
+    @app.cli.command("grant-reader")
+    @click.argument("user")
+    def grant_reader(user: str) -> None:
+        """Create (or update) a read-only MySQL user for coauthored-browse. Its password is
+        read from the READER_DB_PASSWORD environment variable, never from the command line."""
+        import os
+        import re as _re
+        from sqlalchemy import text
+        password = os.environ.get("READER_DB_PASSWORD", "")
+        if not password:
+            raise click.ClickException("Set READER_DB_PASSWORD.")
+        if not _re.fullmatch(r"[A-Za-z0-9_]{1,32}", user):
+            raise click.ClickException("User names are letters, digits and _ only.")
+        eng = engine()
+        if eng.dialect.name != "mysql":
+            raise click.ClickException("grant-reader is for MySQL.")
+        db = eng.url.database
+        with eng.begin() as conn:
+            conn.execute(text(f"CREATE USER IF NOT EXISTS '{user}'@'%' IDENTIFIED BY :pw"), {"pw": password})
+            conn.execute(text(f"ALTER USER '{user}'@'%' IDENTIFIED BY :pw"), {"pw": password})
+            conn.execute(text(f"GRANT SELECT ON `{db}`.* TO '{user}'@'%'"))
+        click.echo(f"read-only user {user} can SELECT on {db}")
+
     @app.cli.command("load-classic-schema")
     def load_classic_schema() -> None:
         """Load arxiv-base's classic schema (utf8mb4) into an EMPTY MySQL database."""
