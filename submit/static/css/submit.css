@@ -92,3 +92,5 @@ dl.meta dd { margin: 0; }
 
 .site-footer { border-top: 1px solid var(--ca-line); background: var(--ca-soft); padding: 1.25rem 1rem; margin-top: 2rem; }
 .site-footer p { max-width: 52rem; margin: .3rem auto; color: var(--ca-muted); font-size: .92rem; }
+.notice { border-left: 4px solid var(--ca-accent); background: #f3f6f8; padding: .6rem .9rem; margin: 1rem 0; }
+.submitted-list li { margin-bottom: 1rem; }

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Submitted papers{% endblock %}
+{% block head_extra %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<h1>Submitted papers</h1>
+<p>Papers submitted to Coauthored that are waiting for a moderator. They are listed here separately from <a href="{{ browse_base }}/">announced papers</a>.</p>
+{% include "public/_notice.html" %}
+{% if subs %}
+<ol class="submitted-list">
+  {% for sub in subs %}
+  <li>
+    <a href="{{ url_for('public.submitted_detail', sub_id=sub.id) }}"><strong>{{ sub.title }}</strong></a>
+    <div>{% for c in sub.contributors %}{{ c.display_name }}{% if c.kind == 'ai' %} <span class="badge">AI</span>{% endif %}{{ ', ' if not loop.last }}{% endfor %}</div>
+    <div class="hint">Submission {{ sub.id }}{% if sub.kind == 'replacement' %}, new version of coauthored:{{ sub.paper_id }}{% endif %} &middot; {{ category_label(sub.primary_category) }} &middot; submitted {{ sub.created_at.strftime('%-d %b %Y') }}</div>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>No papers are waiting for screening right now.</p>
+{% endif %}
+{% endblock %}

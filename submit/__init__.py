@@ -34,7 +34,9 @@ def create_app(overrides: Optional[Mapping[str, Any]] = None, *, engine: Optiona
 
     from .screening.views import bp as screening_bp
     from .submissions.views import bp as submissions_bp
+    from .public.views import bp as public_bp
     app.register_blueprint(submissions_bp)
+    app.register_blueprint(public_bp)
     app.register_blueprint(screening_bp)
     cli.register(app)
     _templates(app)
