@@ -12,7 +12,7 @@ What exists, and how it was created (2026-11-15). coauthored-browse's `deploy/` 
 | Cloud Run jobs | `coauthored-init` (one-off: `load-classic-schema`, `init-db`, `grant-reader browse`), `coauthored-announce` (`flask announce`) |
 | Cloud Scheduler | `coauthored-daily-announce`, 20:00 UTC daily, runs `coauthored-announce` as `coauthored-scheduler` |
 | Service accounts | `coauthored-browse` (bucket viewer, Cloud SQL client), `coauthored-submit` (bucket admin, Cloud SQL client), `coauthored-scheduler` (invoker on the announce job) |
-| Secrets | `submit-db-uri`, `browse-db-uri`, `submit-db-password`, `browse-db-password`, `submit-secret-key`, `db-root-password`; to add: `resend-api-key`, `clerk-secret-key` |
+| Secrets | `submit-db-uri`, `browse-db-uri`, `submit-db-password`, `browse-db-password`, `submit-secret-key`, `db-root-password`, `resend-api-key` (SMTP password); Clerk needs no secret (email and name come from the custom session token) |
 
 ## Deploy a new version
 
@@ -28,7 +28,14 @@ The service and jobs use `deploy/env.prod.yaml` and the secrets above:
 ```sh
 --service-account coauthored-submit@$P.iam.gserviceaccount.com \
 --add-cloudsql-instances $P:$R:coauthored-db --env-vars-file deploy/env.prod.yaml \
---set-secrets CLASSIC_DB_URI=submit-db-uri:latest,SECRET_KEY=submit-secret-key:latest
+--set-secrets CLASSIC_DB_URI=submit-db-uri:latest,SECRET_KEY=submit-secret-key:latest,SMTP_PASSWORD=resend-api-key:latest
+```
+
+Operations through the job (same image and settings), e.g.:
+
+```sh
+gcloud run jobs execute coauthored-announce --project $P --region $R --args=send-test-email,admin@aicoauthored.dev --wait
+gcloud run jobs execute coauthored-announce --project $P --region $R --args=set-moderator,someone@example.org,--on --wait
 ```
 
 ## Email (Resend) and sign-in (Clerk)
@@ -42,4 +49,4 @@ The service and jobs use `deploy/env.prod.yaml` and the secrets above:
 ## Domains
 
 `aicoauthored.dev` -> `coauthored-browse` and `submit.aicoauthored.dev` -> `coauthored-submit`
-via Cloud Run domain mappings, after the domain is verified (`gcloud domains verify`).
+via Cloud Run domain mappings (live since 2026-11-16, Google-managed certificates).
