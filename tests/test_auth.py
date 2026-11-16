@@ -111,9 +111,11 @@ def test_hs256_token_is_rejected(clerk):
 def test_clerk_app_creates_account_on_first_sight(db_uri, store, mail, clerk, keys):
     app = create_app({**PROD, "CLASSIC_DB_URI": db_uri}, store=store, mail=mail, authenticator=clerk)
     client = app.test_client()
-    assert client.get("/account").status_code == 302  # no token: sent to sign in
+    anon = client.get("/account")  # no token: the session-establishing page, not the account
+    assert anon.status_code == 200 and "data-sign-in=" in anon.get_data(as_text=True)
     client.set_cookie("__session", token(keys[0]))
-    assert client.get("/account").status_code == 200
+    signed_in = client.get("/account")
+    assert signed_in.status_code == 200 and "data-sign-in=" not in signed_in.get_data(as_text=True)
     client.delete_cookie("__session")
     bearer = {"Authorization": f"Bearer {token(keys[0])}"}
     assert client.get("/account", headers=bearer).status_code == 200
@@ -125,7 +127,8 @@ def test_clerk_app_creates_account_on_first_sight(db_uri, store, mail, clerk, ke
                 "user_123", "ada@example.org", "Ada Lovelace")
             assert not account.is_moderator and not account.is_banned
     bad = {"Authorization": f"Bearer {token(keys[1])}"}
-    assert client.get("/account", headers=bad).status_code == 302
+    resp = client.get("/account", headers=bad)  # a bad token is no session: establish or sign in
+    assert resp.status_code == 200 and "data-sign-in=" in resp.get_data(as_text=True)
 
 
 def test_sign_in_redirects_to_clerk_hosted_page(db_uri, store, mail, clerk):
@@ -142,7 +145,7 @@ def test_sign_in_redirects_to_clerk_hosted_page(db_uri, store, mail, clerk):
 
 # ---- Guards ---------------------------------------------------------------------------
 
-def test_anonymous_visitors_are_sent_to_sign_in(client):
+def test_anonymous_visitors_are_sent_to_sign_in_under_dev_auth(client):
     resp = client.get("/submit")
     assert resp.status_code == 302 and resp.headers["Location"].startswith("/sign-in?next=/submit")
     assert client.post("/submit").status_code in (400, 401)  # CSRF or auth: never accepted
@@ -152,3 +155,20 @@ def test_banned_account_cannot_submit(client, session):
     make_account(session, "banned@example.org", banned=True)
     as_user(client, "banned@example.org")
     assert client.get("/submit").status_code == 403
+
+
+def test_clerk_mode_protected_page_establishes_session_instead_of_looping(db_uri, store, mail, clerk):
+    """Without a valid __session cookie, a protected page must not redirect straight to
+    Clerk (Clerk would send a signed-in visitor straight back: a redirect loop). It renders
+    a page that lets Clerk's script set the cookie, with sign-in as the fallback."""
+    app = create_app({**PROD, "CLASSIC_DB_URI": db_uri,
+                      "CLERK_PUBLISHABLE_KEY": "pk_test_Y2xlcmsuY29hdXRob3JlZC50ZXN0JA",
+                      "CLERK_FRONTEND_API_URL": "https://clerk.coauthored.test",
+                      "CLERK_SIGN_IN_URL": "https://accounts.coauthored.test/sign-in"},
+                     store=store, mail=mail, authenticator=clerk)
+    resp = app.test_client().get("/account", base_url="https://submit.coauthored.test")
+    assert resp.status_code == 200
+    assert resp.headers["Cache-Control"] == "no-store"
+    page = resp.get_data(as_text=True)
+    assert 'data-sign-in="/sign-in?next=/account"' in page
+    assert "clerk-establish.js" in page and 'id="clerk-js"' in page

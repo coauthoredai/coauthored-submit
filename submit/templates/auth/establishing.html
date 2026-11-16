@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Signing you in{% endblock %}
+{% block content %}
+<div id="establish" data-sign-in="{{ sign_in_url }}">
+  <h1>Signing you in…</h1>
+  <p>One moment while we confirm your session.</p>
+  <noscript><p>Signing in needs JavaScript. <a href="{{ sign_in_url }}">Continue to sign in</a>.</p></noscript>
+  <div id="establish-failed" hidden>
+    <p>We couldn't confirm your session. Your browser may be blocking cookies for this site.</p>
+    <p><a href="{{ sign_in_url }}">Sign in again</a></p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/clerk-establish.js') }}" defer></script>
+{% endblock %}

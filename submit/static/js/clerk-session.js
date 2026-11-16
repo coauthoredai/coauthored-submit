@@ -5,6 +5,10 @@
   function ready() {
     if (!window.Clerk) { return; }
     window.Clerk.load().then(function () {
+      // A signed-in page loaded: clear the "Signing you in" retry counter.
+      if (window.Clerk.session && !document.getElementById("establish")) {
+        try { sessionStorage.removeItem("coauthored_establish_tries"); } catch (e) {}
+      }
       var out = document.querySelector("[data-clerk-sign-out]");
       if (out) {
         var go = function () { window.Clerk.signOut({ redirectUrl: out.getAttribute("data-redirect") || "/" }); };
