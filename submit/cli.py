@@ -27,6 +27,16 @@ def _set_flag(email: str, flag: str, on: bool) -> None:
 
 
 def register(app: Flask) -> None:
+    @app.cli.command("send-test-email")
+    @click.argument("to")
+    def send_test_email(to: str) -> None:
+        """Send a test message through the configured mailer (checks SMTP settings)."""
+        current_app.extensions["mailer"].send(mailer.Message(
+            to=to, subject="Coauthored test email",
+            body="This is a test message from Coauthored's submission service. "
+                 "If you can read it, outgoing email works.\n"))
+        click.echo(f"sent a test email to {to} via {current_app.config['MAILER']}")
+
     @app.cli.command("grant-reader")
     @click.argument("user")
     def grant_reader(user: str) -> None:

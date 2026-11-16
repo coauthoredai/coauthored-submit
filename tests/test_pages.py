@@ -33,3 +33,10 @@ def test_moderation_detail_links_the_pdf(client, session):
     resp = client.get(f"/moderation/{sub.id}/pdf")
     assert resp.mimetype == "application/pdf" and "Content-Security-Policy" not in resp.headers
     assert client.get("/moderation").headers["Content-Security-Policy"].startswith("default-src 'self'")
+
+
+def test_send_test_email_command(app, mail):
+    result = app.test_cli_runner().invoke(args=["send-test-email", "someone@example.org"])
+    assert result.exit_code == 0, result.output
+    assert mail.outbox[-1].to == "someone@example.org"
+    assert mail.outbox[-1].subject == "Coauthored test email"
